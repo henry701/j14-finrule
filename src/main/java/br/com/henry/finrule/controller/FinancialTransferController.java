@@ -1,7 +1,9 @@
 package br.com.henry.finrule.controller;
 
+import br.com.henry.finrule.business.FeeParameters;
+import br.com.henry.finrule.business.FinancialFeeInferrer;
 import br.com.henry.finrule.model.dto.FinancialTransferCreation;
-import br.com.henry.finrule.model.dto.FinancialTransactionResponse;
+import br.com.henry.finrule.model.dto.FinancialTransferResponse;
 import br.com.henry.finrule.model.entity.FinancialTransfer;
 import br.com.henry.finrule.repository.FinancialTransferRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -28,41 +31,50 @@ public class FinancialTransferController {
 
     private final FinancialTransferRepository financialTransferRepository;
     private final ModelMapper modelMapper;
+    private final FinancialFeeInferrer financialFeeInferrer;
 
-    public FinancialTransferController(@Autowired FinancialTransferRepository financialTransferRepository, @Autowired ModelMapper modelMapper) {
+    public FinancialTransferController(@Autowired FinancialTransferRepository financialTransferRepository, @Autowired ModelMapper modelMapper, @Autowired FinancialFeeInferrer financialFeeInferrer) {
         this.financialTransferRepository = financialTransferRepository;
         this.modelMapper = modelMapper;
+        this.financialFeeInferrer = financialFeeInferrer;
     }
 
-    @PostMapping(value = "/financialTransaction", consumes = MediaType.APPLICATION_JSON_VALUE, name = "schedule-financial-transaction", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinancialTransactionResponse> create(@Valid @RequestBody FinancialTransferCreation financialTransferCreation, HttpServletRequest request) {
+    @PostMapping(value = "/financialTransfer", consumes = MediaType.APPLICATION_JSON_VALUE, name = "schedule-financial-transfer", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinancialTransferResponse> create(@Valid @RequestBody FinancialTransferCreation financialTransferCreation, HttpServletRequest request) {
         FinancialTransfer financialTransfer = modelMapper.map(financialTransferCreation, FinancialTransfer.class);
+        financialTransfer.setSchedulingDate(ZonedDateTime.now());
+        FeeParameters feeParameters = financialFeeInferrer.inferFee(financialTransfer);
+        financialTransfer.setFee(feeParameters.getFee());
+        financialTransfer.setFeeType(feeParameters.getFeeType());
         financialTransfer = financialTransferRepository.save(financialTransfer);
-        FinancialTransactionResponse financialTransactionResponse = modelMapper.map(financialTransfer, FinancialTransactionResponse.class);
-        return ResponseEntity.ok().body(financialTransactionResponse);
+        FinancialTransferResponse financialTransferResponse = modelMapper.map(financialTransfer, FinancialTransferResponse.class);
+        return ResponseEntity.ok().body(financialTransferResponse);
     }
 
-    @GetMapping(value = "/financialTransaction/{id}", name = "get-financial-transaction-by-id", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinancialTransactionResponse> getById(@PathVariable(name = "id") Long id) {
+    @GetMapping(value = "/financialTransfer/{id}", name = "get-financial-transfer-by-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinancialTransferResponse> getById(@PathVariable(name = "id") Long id) {
         return financialTransferRepository.findById(id)
-            .map(financialTransfer -> ResponseEntity.ok(modelMapper.map(financialTransfer, FinancialTransactionResponse.class)))
+            .map(financialTransfer -> ResponseEntity.ok(modelMapper.map(financialTransfer, FinancialTransferResponse.class)))
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping(value = "/financialTransaction/{id}", name = "cancel-financial-transaction-by-id", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinancialTransactionResponse> delete(@PathVariable(name = "id") Long id) {
+    @DeleteMapping(value = "/financialTransfer/{id}", name = "cancel-financial-transfer-by-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinancialTransferResponse> delete(@PathVariable(name = "id") Long id) {
         return financialTransferRepository.findById(id)
             .map(financialTransfer -> {
+                if(financialTransfer.getTransferDate().isBefore(ZonedDateTime.now())) {
+                    throw new IllegalStateException("Cannot cancel a transfer that has already been done!");
+                }
                 financialTransferRepository.deleteById(id);
-                return ResponseEntity.ok(modelMapper.map(financialTransfer, FinancialTransactionResponse.class));
+                return ResponseEntity.ok(modelMapper.map(financialTransfer, FinancialTransferResponse.class));
             })
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/financialTransaction", name = "get-financial-transaction-list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Stream<FinancialTransactionResponse>> list() {
+    @GetMapping(value = "/financialTransfer", name = "get-financial-transfer-list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Stream<FinancialTransferResponse>> list() {
         return ResponseEntity.ok(StreamSupport.stream(financialTransferRepository.findAll().spliterator(), true)
-            .map(c -> modelMapper.map(c, FinancialTransactionResponse.class)));
+            .map(c -> modelMapper.map(c, FinancialTransferResponse.class)));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
