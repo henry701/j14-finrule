@@ -4,4 +4,4 @@ LABEL maintainer = "Henrique Borsatto de Campos<henry_tuori@hotmail.com>"
 
 COPY app app
 
-ENTRYPOINT ["java","-Dlogback.configurationFile=app/logback-spring.xml","-cp","app:app/lib/*","br.com.henry.finrule.Application"]
+ENTRYPOINT ["java","-Dlogging.config=app/logback-spring.xml","-cp","app:app/lib/*","br.com.henry.finrule.Application"]

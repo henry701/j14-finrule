@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: j14-finrule
+  version: '1.0'
+  description: 'Small API developed in Java 14 with Spring for scheduling financial transfers'
+  contact:
+    email: "henry_tuori@hotmail.com"
+    name: "Henrique Borsatto de Campos"
+    url: "https://github.com/henry701"
+servers:
+  - url: http://{host}:{port}
+    variables:
+      host:
+        default: "127.0.0.1"
+      port:
+        default: "8085"
+paths:
+  /financialTransfer:
+    post:
+      summary: Schedule FinancialTransfer
+      description: 'Schedules a Financial Transfer'
+      operationId: ScheduleFinancialTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleFinancialTransferRequest'
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinancialTransferResponse'
+        400:
+          description: Validation Errors in the Request
+      deprecated: false
+    get:
+      summary: List FinancialTransfers
+      description: 'Lists the Financial Transfers'
+      operationId: ListFinancialTransfers
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FinancialTransferResponse'
+      deprecated: false
+  /financialTransfer/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: 'Financial Transfer ID'
+        required: true
+        schema:
+          type: integer
+          example: 1
+    delete:
+      summary: Cancel FinancialTransfer
+      description: 'Cancels a FinancialTransfer provided it has not yet been executed'
+      operationId: DeleteFinancialTransfer
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinancialTransferResponse'
+        404:
+          description: FinancialTransfer Not Found
+      deprecated: false
+    get:
+      summary: Retrieve FinancialTransfer by ID
+      description: 'Retrieves FinancialTransfer by its ID'
+      operationId: RetrieveFinancialTransferById
+      responses:
+        200:
+          description: Success Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinancialTransferResponse'
+        404:
+          description: FinancialTransfer Not Found
+      deprecated: false
+components:
+  schemas:
+    BankAccountId:
+      title: BankAccountId
+      required:
+        - id
+        - accountNumber
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        accountNumber:
+          type: string
+          pattern: '[0-9]{6}'
+      example:
+        id: 1
+        accountNumber: '001857'
+    BankAccountNoId:
+      title: BankAccountNoId
+      required:
+        - accountNumber
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          pattern: '[0-9]{6}'
+      example:
+        accountNumber: '001857'
+    ScheduleFinancialTransferRequest:
+      title: ScheduleFinancialTransferRequest
+      required:
+        - sourceAccount
+        - destinationAccount
+        - value
+        - transferDate
+      type: object
+      properties:
+        value:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        transferDate:
+          type: string
+          format: date-time
+        sourceAccount:
+          $ref: '#/components/schemas/BankAccountNoId'
+        destinationAccount:
+          $ref: '#/components/schemas/BankAccountNoId'
+      example:
+        sourceAccount:
+          accountNumber: '001857'
+        destinationAccount:
+          accountNumber: '002761'
+        value: '51326.25'
+        transferDate: "2020-07-22T01:03:00.000Z"
+    FinancialTransferResponse:
+      title: FinancialTransferResponse
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        value:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        transferDate:
+          type: string
+          format: date-time
+        sourceAccount:
+          $ref: '#/components/schemas/BankAccountId'
+        destinationAccount:
+          $ref: '#/components/schemas/BankAccountId'
+      example:
+        id: 1
+        sourceAccount:
+          id: 1
+          accountNumber: '001857'
+        destinationAccount:
+          id: 5
+          accountNumber: '002761'
+        value: '51326.25'
+        transferDate: "2020-07-22T01:03:00.000Z"
+tags:
+  - name: "rule"
+  - name: "engine"
+  - name: "spring"

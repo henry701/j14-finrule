@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -24,16 +25,20 @@ public class FinancialTransfer {
 
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @NotNull(message = "Source account is mandatory")
+    @Valid
     private BankAccount sourceAccount;
 
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @NotNull(message = "Destination account is mandatory")
+    @Valid
     private BankAccount destinationAccount;
 
     @NotNull(message = "Financial transfer value is mandatory")
+    @Min(value = 0, message = "Financial transfer value cannot be negative")
     private BigDecimal value;
 
     @NotNull(message = "Financial transfer fee is mandatory")
+    @Min(value = 0, message = "Financial transfer fee cannot be negative")
     private BigDecimal fee;
 
     @PastOrPresent

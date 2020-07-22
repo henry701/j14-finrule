@@ -27,25 +27,39 @@ There is also a [Postman](https://www.getpostman.com) collection in the reposito
 - Spring Boot
     - The go-to framework for implementing modern REST micro-services in Java.
 - H2 Database
-    - A database with in-memory capabilities, to satisfy the requirement "Data persistence in memory only".
+    - A database with in-memory capabilities, to satisfy the requirement "Data persistence in memory only" while still being able to use JPA.
 - Docker
     - For easy setup of the application without the need to install a Java 14 JDK yourself.
 - Docker Compose
     - Used to configure some parameters of the application's Docker image without long command lines.
-- JUnit
+- JUnit 4
     - The go-to test framework for unit tests in Java, with Spring integration available.
 - Logback
     - Default logging framework for Spring, also widely used for other kinds of Java applications.
 - Lombok
     - To avoid writing boilerplate code (like getters and setters, toString, equals) in application models.
+    
+## How to Add New Rules
+
+Simply create a class that implements the `FinancialFeeRule` interface, annotate it with `@Service` and define its precedence in the rule chain by using `@Order`.
+
+Example class header for a class with `-1` order, which is processed before any class with an order value than it (because it will be resolved first due to lower order):
+```java
+@Service
+@Order(value = -1)
+public class MyCustomRule implements FinancialFeeRule
+{
+    // ...
+}
+```
 
 ## Runtime Requirements
 
 ### With Docker
 - Docker and Docker Compose installed
-    - Docker Desktop (for Windows users): v2.1.0.0 (36874)
-    - Docker Engine: v19.03.1
-    - Docker Compose: 1.24.1
+    - Docker Desktop (for Windows users): v2.3.3.2 (46784)
+    - Docker Engine: v19.03.12
+    - Docker Compose: 1.26.2
 
 ### Without Docker
 - Java 14 runtime installed
@@ -94,13 +108,13 @@ For deploying in production, run:
 ```bash
 docker-compose up --build
 ```
-In the same working directory where the archive as extracted.
+In the same working directory where the archive was extracted.
 
 #### Deploying without Docker
 
 In case the production machine does not have Docker installed,
 you may also run the application as a simple Java process, executing:
 ```bash
-java -Dlogback.configurationFile=app/logback-spring.xml -cp "app:app/lib/*" "br.com.henry.finrule.Application"
+java -Dlogging.config=app/logback-spring.xml -cp "app:app/lib/*" "br.com.henry.finrule.Application"
 ```
-In the same working directory where the archive as extracted.
+In the same working directory where the archive was extracted.

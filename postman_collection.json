@@ -1,0 +1,185 @@
+{
+	"info": {
+		"_postman_id": "ef5f9040-f308-441b-8c17-2d7df9ea91e9",
+		"name": "FinRule API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Schedule Transfer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8a530918-3a7e-4d8c-b1ff-5352574b5005",
+						"exec": [
+							"var moment = require('moment');\r",
+							"pm.globals.set(\"TRANSFER_GENDATE_NOWPLUSSOME\", moment().add(2, 'days').format());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"sourceAccount\": {\n\t\t\"accountNumber\": \"001857\"\n\t},\n\t\"destinationAccount\": {\n\t\t\"accountNumber\": \"002761\"\n\t},\n\t\"value\": \"51326.25\",\n\t\"transferDate\": \"{{TRANSFER_GENDATE_NOWPLUSSOME}}\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8085/financialTransfer",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"financialTransfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid Schedule Transfer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"sourceAccount\": {\n\t\t\"accountNumber\": \"\"\n\t},\n\t\"destinationAccount\": {\n\t\t\"accountNumber\": -5\n\t},\n\t\"value\": -5,\n\t\"transferDate\": \"{{TRANSFER_GENDATE_NOWPLUSSOME}}\",\n\t\"nonField\": \"a\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8085/financialTransfer",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"financialTransfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Transfers",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8085/financialTransfer",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"financialTransfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel Transfer",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8085/financialTransfer/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"financialTransfer",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve Financial Transfer by Id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8085/financialTransfer/1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"financialTransfer",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

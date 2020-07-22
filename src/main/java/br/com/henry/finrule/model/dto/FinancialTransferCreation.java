@@ -1,10 +1,11 @@
 package br.com.henry.finrule.model.dto;
 
-import br.com.henry.finrule.model.entity.BankAccount;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Future;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -14,12 +15,15 @@ import java.time.ZonedDateTime;
 public class FinancialTransferCreation {
 
     @NotNull(message = "Source account is mandatory")
-    private BankAccount sourceAccount;
+    @Valid
+    private BankAccountInput sourceAccount;
 
     @NotNull(message = "Destination account is mandatory")
-    private BankAccount destinationAccount;
+    @Valid
+    private BankAccountInput destinationAccount;
 
     @NotNull(message = "Financial transfer value is mandatory")
+    @Min(value = 0, message = "Financial transfer value cannot be negative")
     private BigDecimal value;
 
     @Future

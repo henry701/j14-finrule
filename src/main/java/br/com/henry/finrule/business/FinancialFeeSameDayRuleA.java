@@ -12,8 +12,8 @@ import java.util.Optional;
 @Order(value = 100)
 public class FinancialFeeSameDayRuleA implements FinancialFeeRule {
 
-    public static final BigDecimal FIXED_FEE = BigDecimal.valueOf(3);
-    public static final BigDecimal VARIABLE_FEE_FACTOR = new BigDecimal("0.03");
+    private static final BigDecimal FIXED_FEE = BigDecimal.valueOf(3);
+    private static final BigDecimal VARIABLE_FEE_FACTOR = new BigDecimal("0.03");
 
     @Override
     public Optional<FeeParameters> inferFee(FinancialTransfer financialTransfer) {
